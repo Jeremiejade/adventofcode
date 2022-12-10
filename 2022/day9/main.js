@@ -2,7 +2,14 @@ const fs = require('fs');
 const _ = require('lodash')
 const input = fs.readFileSync('./input', { encoding: 'utf8' });
 
-const instructions =  input.trim().split('\n');
+const instructions =  `R 5
+U 8
+L 8
+D 3
+R 17
+D 10
+L 25
+U 20`.trim().split('\n');
 
 
 const hTrajectory = [{
@@ -10,10 +17,15 @@ const hTrajectory = [{
   y:0
 }];
 
-const tTrajectory = [{
-  x:0,
-  y:0
-}];
+const trajectories = []
+
+for (let i = 0; i < 9; i++) {
+  trajectories.push([{
+    x:0,
+    y:0
+  }])
+}
+console.log(trajectories.length)
 
 instructions.forEach(instruction => hPosition(instruction));
 
@@ -25,55 +37,116 @@ function hPosition(input) {
     for (let i = 1; i <= move; i++) {
       x++;
       hTrajectory.push({x,y});
-      moveTX({x,y}, 1)
+      trajectories.reduce((acc, tr, i) => {
+        if(i === 0 ){
+         return moveTo(acc, hTrajectory, tr);
+        }
+        return moveTo(acc, trajectories[i - 1], tr);
+      }, {x,y});
+
     }
   }
   if(direction === 'L') {
     for (let i = 1; i <= move; i++) {
       x--;
       hTrajectory.push({x,y});
-      moveTX({x,y}, -1)
+      trajectories.reduce((acc, tr, i) => {
+        if(i === 0 ){
+          return moveTo(acc, hTrajectory, tr);
+        }
+        return moveTo(acc, trajectories[i - 1], tr);
+      }, {x,y});
     }
   }
   if(direction === 'U') {
     for (let i = 1; i <= move; i++) {
       y++;
       hTrajectory.push({x,y});
-      moveTY({x,y}, 1)
+      trajectories.reduce((acc, tr, i) => {
+        if(i === 0 ){
+          return moveTo(acc, hTrajectory, tr);
+        }
+        return moveTo(acc, trajectories[i - 1], tr);
+      }, {x,y});
     }
   }
   if(direction === 'D') {
     for (let i = 1; i <= move; i++) {
       y--;
       hTrajectory.push({x,y});
-      moveTY({x,y}, -1)
+      trajectories.reduce((acc, tr, i) => {
+        if(i === 0 ){
+          return moveTo(acc, hTrajectory, tr);
+        }
+        return moveTo(acc, trajectories[i - 1], tr);
+      }, {x,y});
     }
   }
 }
-function moveTX(hPos, direction) {
-  let { x, y } = tTrajectory[tTrajectory.length - 1];
+
+
+function moveTo(hPos, ht = hTrajectory, trajectory) {
+  const {x: x1, y: y1} = ht[ht.length -1];
+  const {x: x0, y: y0} = ht[ht.length -2];
+  if(y1 !== y0 && x1 !== x0) {
+   return jump(hPos, trajectory)
+  }else if(y1 === y0 ) {
+   return  moveTX(hPos, x1 - x0, trajectory)
+  }
+  return  moveTY(hPos, y1 - y0, trajectory)
+}
+
+function jump(hPos, trajectory) {
+  let { x, y } = trajectory[trajectory.length - 1];
+  const deltaX = hPos.x - x;
+  const deltaY = hPos.y - y;
+  if(deltaY === 1 && deltaX === 1) {
+    trajectory.push({x, y});
+    return { x, y } ;
+  }
+  if(deltaX>0) {
+    x++
+  }else {
+    x--
+  }
+  if(deltaY>0) {
+    y++
+  }else {
+    y--
+  }
+  trajectory.push({x, y});
+  return { x, y } ;
+}
+
+function moveTX(hPos, direction, trajectory) {
+  let { x, y } = trajectory[trajectory.length - 1];
   const delta = hPos.x - x;
+
   if(delta < 2 && delta > -2) {
-    return;
+    trajectory.push({x, y});
+    return { x, y } ;
   }
   x += direction;
   if(hPos.y !== y) {
     y = hPos.y;
   }
-  tTrajectory.push({x, y});
+  trajectory.push({x, y});
+  return { x, y }
 }
 
-function moveTY(hPos, direction) {
-  let { x, y } = tTrajectory[tTrajectory.length - 1];
+function moveTY(hPos, direction, trajectory ) {
+  let { x, y } = trajectory[trajectory.length - 1];
   const delta = hPos.y - y;
   if(delta < 2 && delta > -2) {
-    return;
+    trajectory.push({x, y});
+    return { x, y }
   }
   y += direction;
   if(hPos.x !== x) {
     x = hPos.x;
   }
-  tTrajectory.push({x, y});
+  trajectory.push({x, y});
+  return { x, y }
 }
-
-console.log(_.uniqWith(tTrajectory, _.isEqual).length);
+// console.log(trajectories)
+// console.log(_.uniqWith(trajectories[trajectories.length -1], _.isEqual).length);
