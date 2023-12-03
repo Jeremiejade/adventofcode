@@ -1,17 +1,13 @@
 const fs = require('fs');
 
-const symbolLocation = {
-  0: []
-}
 const numberLocation = {
 
 }
-let result = 0;
+const gears = []
 
 fs.readFile('./input', 'utf8',(err, data) => {
   const input = data.toString().trim().split('\n').map(line => line.split(''));
 input.forEach((line, i) =>{
-  symbolLocation[i + 1] = [];
   numberLocation[i] = []
   const lineToString = line.join('');
   const digits = lineToString.matchAll(/(\d*)/g);
@@ -25,45 +21,47 @@ input.forEach((line, i) =>{
     }
   });
   line.forEach((l, j) => {
-    if(isASymbol(l)){
-      symbolLocation[i - 1]?.push([j-1, j, j+1])
-      symbolLocation[i].push([j-1, j, j+1])
-      symbolLocation[i + 1].push([j-1, j, j+1])
+    if(isAGear(l)){
+      gears.push({
+        indexI: i,
+        indexJ: j
+      });
     }
   });
 });
-  console.log('numberLocation', numberLocation)
-  console.log('symbolLocation', symbolLocation)
 
-  for (let i in numberLocation) {
-    numberLocation[i].forEach(({id, index, length}) => {
-      if(isCollision(symbolLocation[i].flatMap(s=>s), {id, index, length})) {
-        console.log('collision',id)
-
-        result+=id;
-        console.log('result',result)
-
-      }else {
-        console.log('not', id)
-      }
-    });
-  }
+  const result = gears.map(({ indexI, indexJ }) => {
+    return findAdjacentNumbers(indexI, indexJ)
+  }).reduce((acc, adjacentNumbers) => {
+    if(adjacentNumbers.length === 2) {
+      acc += adjacentNumbers[0].id * adjacentNumbers[1].id
+    }
+    return acc
+  },0);
   console.log(result)
 });
 
-function isASymbol(l) {
-  return !(Number.isInteger(parseInt(l)) || l === '.');
+function isAGear(l) {
+  return l === '*';
 }
 
-function isCollision(symbolsIndex, { index, length}){
-  let collision = false
-  for (let i = index; i < index + length; i++) {
-    console.log('symbolsIndex', symbolsIndex, i)
-    if(symbolsIndex.includes(i)){
-      collision = true;
-      break
+function findAdjacentNumbers(indexI, indexJ) {
+  const adjacentNumbers = [];
+  const start = indexI - 1 < 0 ? 0 : indexI - 1;
+  for (let i = start; i <= indexI + 1; i++) {
+
+    const stratJ = indexJ - 1 < 0 ? 0 : indexJ - 1;
+    for (let j = stratJ; j <= indexJ + 1; j++) {
+      numberLocation[i].forEach((number)=> {
+        if(j >= number.index
+          && j <= number.index + number.length -1
+          && !adjacentNumbers.find(({id, index}) => id === number.id && index === number.index)
+        ){
+          adjacentNumbers.push(number)
+        }
+      });
+
     }
   }
-  console.log('collision',collision)
-  return collision
+  return adjacentNumbers;
 }
