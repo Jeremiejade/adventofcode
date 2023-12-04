@@ -10,21 +10,30 @@ fs.readFile('./input', 'utf8',(err, data) => {
           .filter(t => t.trim() !== '').map(n => parseInt(n)));
 
     });
-  console.log(input)
-  let result = input.map(([winCards, cards])=> computeScore(winCards,cards))
-    .reduce((acc, score) => {
-      acc += score
-      return acc;
-    },0)
+  const cards = {}
+  const scoresCard = input.map(([winCards, card])=> cardByScore(winCards, card))
+  scoresCard.forEach((score, index) => {
+    const cardId = index + 1;
+    cards[cardId] = cards[cardId] ? cards[cardId] + 1 : 1;
+    for (let i = 0; i < cards[cardId]; i++) {
+      for (let i = cardId + 1; i <= cardId + score ; i++) {
+        cards[i] = cards[i] ? cards[i] + 1 : 1
+      }
+    }
+  });
+ let result = 0;
+  for (let cardId in cards) {
+    result += cards[cardId]
+  }
   console.log(result)
 });
 
-function computeScore(winCards, cards) {
+function cardByScore(winCards, card, id) {
   let score = 0;
-  cards.forEach(card => {
-    if(winCards.indexOf(card) !== -1){
-      score = score === 0 ? 1 : score*2;
+  card.forEach(cardNumber => {
+    if(winCards.indexOf(cardNumber) !== -1){
+      score++
     }
   });
-  return score;
+ return score;
 }
