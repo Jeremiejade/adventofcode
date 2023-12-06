@@ -4,16 +4,13 @@ const fs = require('fs');
 fs.readFile('./input', 'utf8',(err, data) => {
   const input = data.toString().trim().split('\n')
     .map(inp => inp.substring(inp.indexOf(':') + 1, inp.length)
-      .split(' ')
-      .filter(n => n.trim() !== '')
-      .map(n => parseInt(n))
+      .replaceAll(' ', '')
     )
-  const timesByDistance = input[0].map((n, i) => {
-    return {
-      t:n,
-      d:input[1][i]
-    }
-  });
+    .map(n => parseInt(n))
+  const timesByDistance =  [{
+      t:input[0],
+      d:input[1]
+    }]
   const r = timesByDistance.reduce((acc, tByD) => {
     const {min, max} = c(tByD)
     return acc*(max-min +1)
