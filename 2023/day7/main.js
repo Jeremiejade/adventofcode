@@ -85,7 +85,7 @@ function findType(cards) {
 
   const score = Object.values(cardsByNumber)
 
-  if(score.indexOf(5 - j) !== -1) {
+  if(score.indexOf(5 - j) !== -1 || j === 5) {
     return 6
   }
   if(score.indexOf(4 - j) !== -1) {
@@ -122,5 +122,4 @@ function computeCardsPound(cards) {
     return acc
   },0)
 }
-
 
