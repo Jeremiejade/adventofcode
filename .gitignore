@@ -1,4 +1,6 @@
 2022/package.json
 2022/package-lock.json
+package-lock.json
+/node_modules
 .idea/
 

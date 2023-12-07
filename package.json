@@ -1,0 +1,22 @@
+{
+  "name": "adventofcode",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jeremiejade/adventofcode.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jeremiejade/adventofcode/issues"
+  },
+  "homepage": "https://github.com/Jeremiejade/adventofcode#readme",
+  "dependencies": {
+    "vitest": "^1.0.2"
+  }
+}
