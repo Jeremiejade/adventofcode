@@ -26,15 +26,28 @@ function c(deepValues, values, round = 2){
     return acc;
   }, deepValues);
   if(deepValues[deepValues.length -1][0] === 0) {
-    return computeNextStep(deepValues)
+    return p(values, deepValues.length);
   }
   round++
   return c(deepValues, values, round)
 }
 
-function computeNextStep(deepValues) {
-  return deepValues.reverse().reduce((acc, values) => {
-    acc += values[values.length - 1]
-    return acc
-  },0)
+function p(values, round) {
+  values.splice(round);
+  const deepsValues = [values]
+  for (let i = 0; i < round; i++) {
+    const nextValues = deepsValues[i].reduce((acc, v, j) => {
+      if(deepsValues[i][j + 1] !== undefined) {
+        acc.push(deepsValues[i][j + 1] - v)
+      }
+      return acc
+    }, []);
+    if(nextValues.length) deepsValues.push(nextValues)
+  }
+  return deepsValues
+    .map(([v]) => v)
+    .reverse()
+    .reduce((acc, v) => {
+    return v - acc
+  }, 0)
 }
