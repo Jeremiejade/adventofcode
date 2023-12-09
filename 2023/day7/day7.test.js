@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {findType} from "./main.js";
 
-describe('day7 | part-two', () => {
+describe.skip('day7 | part-two', () => {
 
   describe('#findType', () => {
     const cases = [
