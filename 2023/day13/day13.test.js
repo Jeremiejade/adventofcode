@@ -2,49 +2,76 @@ import { describe, expect, it } from 'vitest'
 
 function isVerticalReflexion(index, pattern) {
   let i = 0;
-  let result = true;
+  let result = [];
   while (true) {
     if(index-i < 0 || index + i + 1 > pattern[0].length -1) {
       break;
     }
-    if(!pattern.every(line => {
-      return line[index - i] === line[index + i + 1]
-    })){
-      result = false;
+    const diff = findDiffRow(index - i ,index + i + 1, pattern);
+    if(diff === false) {
+      result = false
       break;
     }
-    i++
-  }
-  return result
-}
+    if(diff === 1) {
+      result.push(diff)
+    }
 
-function isHorizontalReflexion(index, pattern) {
-  let i = 0;
-  let result = true;
-  while (true) {
-    if(index-i < 0 || index + i + 1 > pattern.length -1) {
-      break;
-    }
-    if(!everyColumn(index - i ,index + i + 1, pattern)){
+    if(result.length > 1){
       result = false
       break;
     }
     i++
   }
-  return result
+  return result ? result.length === 1 : false;
 }
 
-function everyColumn(index,compareIndex, pattern) {
-  if(!pattern[compareIndex] ) {
-    return false
+function findDiffRow(index, compareIndex, pattern) {
+  const diff = [];
+  for (let i = 0; i < pattern.length; i++) {
+    if(pattern[i][index] !== pattern[i][compareIndex]) {
+      diff.push(i)
+    }
+    if(diff.length > 1) return false
   }
+  return diff.length;
+}
+
+function isHorizontalReflexion(index, pattern) {
+  let i = 0;
+  let result = [];
+  while (true) {
+    if(index-i < 0 || index + i + 1 > pattern.length -1) {
+      break;
+    }
+    const diff = findDiffColumn(index - i ,index + i + 1, pattern);
+    if(diff === false) {
+      result = false
+      break;
+    }
+    if(diff === 1) {
+      result.push(diff)
+    }
+
+    if(result.length > 1){
+      result = false
+      break;
+    }
+    i++
+  }
+  return result ? result.length === 1 : false;
+}
+
+function findDiffColumn(index, compareIndex, pattern) {
+  const diff = [];
   for (let i = 0; i < pattern[0].length; i++) {
     if(pattern[index][i] !== pattern[compareIndex][i]) {
-      return false
+      diff.push(i)
     }
+    if(diff.length > 1) return false
   }
-  return true;
+  return diff.length
 }
+
 function findVerticalReflection(pattern) {
   let middle = Math.floor(pattern[0].length / 2);
   if(isOdd(pattern[0].length)){
@@ -74,7 +101,6 @@ function findVerticalReflection(pattern) {
 }
 
 function findHorizontalReflection(pattern) {
-  // if(!!endV) return endH = null;
   let middle = Math.floor(pattern.length / 2);
   if(isOdd(pattern.length)){
     middle--
@@ -107,309 +133,47 @@ function isOdd(length) {
   return length % 2 === 0
 }
 
+function findReflection(pattern) {
+  const v = findVerticalReflection(pattern)
+  console.log(v)
+  if(v)  return v
+  const h = findHorizontalReflection(pattern)
+  console.log(h)
+  return h*100;
+}
+
 describe('day13 | 1', () => {
-  describe('#isVerticalReflexion', () => {
-    const cases = [
-      {
-        pattern: [
-          [1, 0, 0, 1, 1, 0],
-          [1, 0, 0, 1, 0, 1],
-          [1, 0, 0, 1, 1, 0]
-        ], index: 0, expected: false
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 1, 0],
-          [1, 0, 0, 1, 0, 1],
-          [1, 0, 0, 1, 1, 0]
-        ], index: 1, expected: true
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 1, 0],
-          [1, 0, 0, 1, 0, 1],
-          [1, 0, 0, 1, 1, 0]
-        ], index: 2, expected: false
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 1, 0],
-          [1, 0, 0, 1, 0, 1],
-          [1, 0, 0, 1, 1, 0]
-        ], index: 3, expected: false
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 1, 0],
-          [1, 0, 0, 1, 0, 1],
-          [1, 0, 0, 1, 1, 0]
-        ], index: 4, expected: false
-      },
-      {
-        pattern: [
-          [1, 1, 0, 0, 1],
-          [0, 0, 1, 1, 0],
-          [1, 1, 0, 0, 1]
-        ], index: 2, expected: true
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 1],
-          [0, 0, 1, 1, 0],
-          [1, 0, 0, 1, 1]
-        ], index: 0, expected: false
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1],
-          [0, 1, 1, 0],
-          [1, 0, 0, 1]
-        ], index: 1, expected: true
-      },
-      {
-        pattern: [
-          ['.', '#', '.', '.', '#', '#', '#', '#', '.', '.', '.'],
-          ['#', '#', '#', '#', '.', '#', '#', '.', '#', '#', '#'],
-          ['.', '#', '#', '.', '#', '.', '.', '.', '#', '#', '#'],
-          ['#', '#', '.', '.', '.', '.', '.', '.', '#', '#', '#'],
-          ['#', '#', '#', '#', '#', '#', '#', '.', '#', '.', '.'],
-          ['#', '#', '#', '#', '#', '#', '#', '.', '#', '.', '.'],
-          ['#', '.', '.', '.', '.', '.', '.', '.', '#', '#', '#'],
-          ['.', '#', '#', '.', '#', '.', '.', '.', '#', '#', '#'],
-          ['#', '#', '#', '#', '.', '#', '#', '.', '#', '#', '#'],
-          ['.', '#', '.', '.', '#', '#', '#', '#', '.', '.', '.'],
-          ['#', '.', '.', '.', '#', '#', '#', '.', '.', '.', '.'],
-          ['.', '#', '#', '.', '.', '.', '.', '#', '.', '.', '.'],
-          ['#', '#', '#', '.', '.', '#', '#', '.', '#', '#', '#'],
-          ['.', '#', '#', '.', '.', '.', '#', '.', '.', '#', '#'],
-          ['.', '.', '#', '#', '.', '#', '#', '#', '.', '#', '#']
-        ], index: 9, expected: true
-      },
+  describe('#findNew', ()=> {
+  it('should return 300', () => {
+    const pattern = [
+      ['#', '.', '#', '#', '.', '.', '#', '#', '.'],
+      ['.', '.', '#', '.', '#', '#', '.', '#', '.'],
+      ['#', '#', '.', '.', '.', '.', '.', '.', '#'],
+      ['#', '#', '.', '.', '.', '.', '.', '.', '#'],
+      ['.', '.', '#', '.', '#', '#', '.', '#', '.'],
+      ['.', '.', '#', '#', '.', '.', '#', '#', '.'],
+      ['#', '.', '#', '.', '#', '#', '.', '#', '.']
+    ];
+    const result = findReflection(pattern);
+
+    expect(result).toBe(300)
+
+  });
+
+  it('should return 100', () => {
+    const pattern = [
+      ['#', '.', '.', '.', '#', '#', '.', '.', '#'],
+      ['#', '.', '.', '.', '.', '#', '.', '.', '#'],
+      ['.', '.', '#', '#', '.', '.', '#', '#', '#'],
+      ['#', '#', '#', '#', '#', '.', '#', '#', '.'],
+      ['#', '#', '#', '#', '#', '.', '#', '#', '.'],
+      ['.', '.', '#', '#', '.', '.', '#', '#', '#'],
+      ['#', '.', '.', '.', '.', '#', '.', '.', '#']
     ]
+    const result = findReflection(pattern);
 
-    cases.forEach(({pattern, index, expected}) => {
-      it(`should return ${expected} for ${pattern}`, () => {
-        const result = isVerticalReflexion(index, pattern)
+    expect(result).toBe(100)
 
-        expect(result).toBe(expected)
-      })
-    })
-  })
-  describe('#findVerticalReflexion', () => {
-    const cases = [
-      {
-        pattern: [
-          [1,2,2,1,5,6,7,8,9,10],
-          [1,2,2,1,5,6,7,8,9,10],
-        ], expected: 2
-      },
-      {
-        pattern: [
-          [1,2,3,4,5,5,4,3,2,1],
-          [1,2,3,4,5,5,4,3,2,1],
-        ], expected: 5
-      },
-      {
-        pattern: [
-          [1,2,3,4,5,6,7,8,8,7],
-          [1,2,3,4,5,6,7,8,8,7],
-        ], expected: 8
-      },
-      {
-        pattern: [
-          [1,2,3,4,5,6,7,8,9,10,10],
-          [1,2,3,4,5,6,7,8,9,10,10],
-        ], expected: 10
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1],
-          [0, 1, 1, 0],
-          [1, 0, 1, 0]
-        ], expected: null
-      },
-      {
-        pattern: [
-          ['.', '#', '.', '.', '#', '#', '#', '#', '.', '.', '.'],
-          ['#', '#', '#', '#', '.', '#', '#', '.', '#', '#', '#'],
-          ['.', '#', '#', '.', '#', '.', '.', '.', '#', '#', '#'],
-          ['#', '#', '.', '.', '.', '.', '.', '.', '#', '#', '#'],
-          ['#', '#', '#', '#', '#', '#', '#', '.', '#', '.', '.'],
-          ['#', '#', '#', '#', '#', '#', '#', '.', '#', '.', '.'],
-          ['#', '.', '.', '.', '.', '.', '.', '.', '#', '#', '#'],
-          ['.', '#', '#', '.', '#', '.', '.', '.', '#', '#', '#'],
-          ['#', '#', '#', '#', '.', '#', '#', '.', '#', '#', '#'],
-          ['.', '#', '.', '.', '#', '#', '#', '#', '.', '.', '.'],
-          ['#', '.', '.', '.', '#', '#', '#', '.', '.', '.', '.'],
-          ['.', '#', '#', '.', '.', '.', '.', '#', '.', '.', '.'],
-          ['#', '#', '#', '.', '.', '#', '#', '.', '#', '#', '#'],
-          ['.', '#', '#', '.', '.', '.', '#', '.', '.', '#', '#'],
-          ['.', '.', '#', '#', '.', '#', '#', '#', '.', '#', '#']
-        ], expected: 10
-      },
-    ]
-
-    cases.forEach(({pattern, expected}) => {
-      it(`should return ${expected} for ${pattern}`, () => {
-        const result = findVerticalReflection(pattern)
-
-        expect(result).toBe(expected)
-      })
-    })
-  })
-  describe('#isHorizontalReflexion', () => {
-
-    const cases = [
-      {
-        pattern: [
-          [1, 0, 0, 1, 1],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 1],
-          [1, 0, 0, 1, 1],
-        ], index: 0, expected: false
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 3],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 3],
-          [1, 0, 0, 1, 4],
-        ], index: 1, expected: true
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 1],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 1],
-          [1, 0, 0, 1, 1],
-        ], index: 2, expected: false
-      },
-      {
-        pattern: [
-          [1, 0, 0, 1, 1],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 0],
-          [1, 0, 0, 1, 1],
-          [1, 0, 0, 1, 1],
-        ], index: 3, expected: true
-      },
-      {
-        pattern: [
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '.', '#', '.', '.', '.', '#', '#', '.', '.', '#'],
-          ['.', '#', '#', '#', '.', '#', '.', '.', '#', '.', '#'],
-          ['#', '.', '#', '.', '#', '#', '#', '#', '.', '#', '#'],
-          ['#', '.', '#', '.', '#', '#', '#', '#', '.', '#', '#'],
-          ['.', '#', '#', '#', '.', '#', '.', '.', '#', '.', '#'],
-          ['.', '.', '#', '.', '.', '.', 'A', '#', '.', '.', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '.', '#', '.', '.', '.', '.', '#', '.', '.', '#']
-        ]
-        , index: 4, expected: false
-      },
-      {
-        pattern: [
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '.', '#', '.', '.', '.', '#', '#', '.', '.', '#'],
-          ['.', '#', '#', '#', '.', '#', '.', '.', '#', '.', '#'],
-          ['#', '.', '#', '.', '#', '#', '#', '#', '.', '#', '#'],
-          ['#', '.', '#', '.', '#', '#', '#', '#', '.', '#', '#'],
-          ['.', '#', '#', '#', '.', '#', '.', '.', '#', '.', '#'],
-          ['.', '.', '#', '.', '.', '.', '.', '#', '.', '.', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '.', '#', '.', '.', '.', '.', '#', '.', '.', '#']
-        ]
-        , index: 9, expected: true
-      },
-    ]
-
-    cases.forEach(({pattern, index, expected}) => {
-      it(`should return ${expected} for ${pattern} and index is ${index}`, () => {
-        const result = isHorizontalReflexion(index, pattern)
-        expect(result).toBe(expected)
-      })
-    })
-  })
-  describe('#findHorizontalReflexion', () => {
-    const cases = [
-      {
-        pattern: [
-          [1,1,1],
-          [2,2,2],
-          [3,3,3],
-          [4,4,4],
-          [4,4,4],
-          [3,3,3],
-          [2,2,2],
-          [1,1,1],
-        ],
-        expected: 4
-      },
-      {
-        pattern: [
-          [1,1,1],
-          [2,2,2],
-          [3,3,3],
-          [4,4,4],
-          [5,5,5],
-          [6,6,6],
-          [6,6,6],
-          [5,5,5],
-        ],
-        expected: 6
-      },
-      {
-        pattern: [
-          [1,1,1],
-          [1,1,1],
-          [2,2,2],
-          [3,3,3],
-          [4,4,4],
-          [5,5,5],
-          [6,6,6],
-          [7,7,7],
-          [8,8,8],
-        ],
-        expected: 1
-      },
-      {
-        pattern: [
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '.', '#', '.', '.', '.', '#', '#', '.', '.', '#'],
-          ['.', '#', '#', '#', '.', '#', '.', '.', '#', '.', '#'],
-          ['#', '.', '#', '.', '#', '#', '#', '#', '.', '#', '#'],
-          ['#', '.', '#', '.', '#', '#', '#', '#', '.', '#', '#'],
-          ['.', '#', '#', '#', '.', '#', '.', '.', '#', '.', '#'],
-          ['.', '.', '#', '.', '.', '.', '.', '#', '.', '.', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['.', '#', '.', '.', '#', '#', '.', '#', '.', '#', '#'],
-          ['#', '.', '#', '#', '#', '.', '.', '.', '.', '#', '.'],
-          ['.', '.', '#', '.', '.', '.', '.', '#', '.', '.', '#']
-        ]
-        , expected: 10
-      },
-    ]
-
-    cases.forEach(({pattern, expected}) => {
-      it(`should return ${expected} for ${pattern}`, () => {
-        const result = findHorizontalReflection(pattern)
-
-        expect(result).toBe(expected)
-      })
-    })
-  })
-
+  });
+})
 })

@@ -11,71 +11,88 @@ fs.readFile('./input', 'utf8',(err, data) => {
   console.log(fData)
 });
 
-
-let endV = false;
-let endH = false;
-function findReflection(pattern, i) {
+function findReflection(pattern) {
   const v = findVerticalReflection(pattern)
-
-  if(v) {
-
-    return v
-  }
+  if(v)  return v
   const h = findHorizontalReflection(pattern)
   if(!h) {
-    console.log('*******************************')
-    console.log({pattern, i})
-    console.log('----------------------------')
-
+    console.log('+++++++++++++++++++++++++++++++++++++')
   }
   return h*100;
 }
 
 function isVerticalReflexion(index, pattern) {
   let i = 0;
-  let result = true;
+  let result = [];
   while (true) {
     if(index-i < 0 || index + i + 1 > pattern[0].length -1) {
       break;
     }
-    if(!pattern.every(line => {
-      return line[index - i] === line[index + i + 1]
-    })){
-      result = false;
+    const diff = findDiffRow(index - i ,index + i + 1, pattern);
+    if(diff === false) {
+      result = false
       break;
     }
-    i++
-  }
-  return result
-}
+    if(diff === 1) {
+      result.push(diff)
+    }
 
-function isHorizontalReflexion(index, pattern) {
-  let i = 0;
-  let result = true;
-  while (true) {
-    if(index-i < 0 || index + i + 1 > pattern.length -1) {
-      break;
-    }
-    if(!everyColumn(index - i ,index + i + 1, pattern)){
+    if(result.length > 1){
       result = false
       break;
     }
     i++
   }
-  return result
+  return result ? result.length === 1 : false;
 }
 
-function everyColumn(index,compareIndex, pattern) {
-  if(!pattern[compareIndex] ) {
-    return false
+function findDiffRow(index, compareIndex, pattern) {
+  const diff = [];
+  for (let i = 0; i < pattern.length; i++) {
+    if(pattern[i][index] !== pattern[i][compareIndex]) {
+      diff.push(i)
+    }
+    if(diff.length > 1) return false
   }
+  return diff.length;
+}
+
+function isHorizontalReflexion(index, pattern) {
+  let i = 0;
+  let result = [];
+  while (true) {
+    if(index-i < 0 || index + i + 1 > pattern.length -1) {
+      break;
+    }
+    const diff = findDiffColumn(index - i ,index + i + 1, pattern);
+    if(diff === false) {
+      result = false
+      break;
+    }
+    if(diff === 1) {
+      result.push(diff)
+    }
+
+    if(result.length > 1){
+      result = false
+      break;
+    }
+    i++
+  }
+  return result ? result.length === 1 : false;
+}
+
+function findDiffColumn(index, compareIndex, pattern) {
+  const diff = [];
   for (let i = 0; i < pattern[0].length; i++) {
     if(pattern[index][i] !== pattern[compareIndex][i]) {
-      return false
+      diff.push(i)
     }
+    if(diff.length > 1) return false
   }
-  return true;
+  return diff.length
 }
+
 function findVerticalReflection(pattern) {
   let middle = Math.floor(pattern[0].length / 2);
   if(isOdd(pattern[0].length)){
@@ -105,7 +122,6 @@ function findVerticalReflection(pattern) {
 }
 
 function findHorizontalReflection(pattern) {
-  // if(!!endV) return endH = null;
   let middle = Math.floor(pattern.length / 2);
   if(isOdd(pattern.length)){
     middle--
