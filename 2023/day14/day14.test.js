@@ -1,17 +1,9 @@
-const fs = require('fs');
-const _ = require("lodash");
-
-fs.readFile('./input', 'utf8',(err, data) => {
-  const fData = data.toString().trim().split('\n')
-    .map(l=> l.split(''))
-
-
-  console.log(findCycle(fData))
-});
-
+import { describe, expect, it } from 'vitest'
+import * as _ from 'lodash'
 
 function findCycle(pattern) {
   let results = [[]];
+  let p = 0;
   let result = 0;
   let newPattern = pattern;
   let finalLoad = 0;
@@ -31,6 +23,7 @@ function findCycle(pattern) {
       finalLoad = firstStepAndCycle.cycle[lastStep]
       break
     }
+    p++
     newPattern = cycle(newPattern)
   }
   return finalLoad;
@@ -81,9 +74,9 @@ function cycleMaker(pattern, length) {
 
 function cycle(pattern) {
   let result = reverseToNorth(pattern)
-  result = reverseToWest(result)
-  result = reverseToSud(result)
-  return reverseToEst(result)
+   result = reverseToWest(result)
+   result = reverseToSud(result)
+    return reverseToEst(result)
 }
 
 function reverseToWest(pattern) {
@@ -172,3 +165,162 @@ function createNewPattern(pattern) {
     return acc;
   }, [])
 }
+
+describe('day14 | 2', () => {
+  describe('#reverse', ()=> {
+    it('should reverse to west', () => {
+      const pattern = [
+        ['.','O','#','.','O'],
+        ['.','.','O','O','.'],
+        ['.','#','.','O','O'],
+      ];
+
+      const result = reverseToWest(pattern);
+
+      expect(result).to.deep.equal([
+        ['O',undefined,'#','O',undefined],
+        ['O','O',undefined,undefined,undefined],
+        [undefined,'#','O','O',undefined],
+      ])
+    });
+
+    it('should reverse to est', () => {
+      const pattern = [
+        ['O','.','#','O','.'],
+        ['.','O','O','.','.'],
+        ['O','O','.','#','.'],
+      ];
+
+      const result = reverseToEst(pattern);
+
+      expect(result).to.deep.equal([
+        [undefined,'O','#',undefined,'O'],
+        [undefined,undefined,undefined,'O','O'],
+        [undefined,'O','O','#',undefined],
+      ])
+    });
+
+    it('should reverse to sud', () => {
+      const pattern = [
+        ['.','O','O',],
+        ['O','.','O',],
+        ['O','#','.',],
+        ['.','O','#',],
+        ['.','.','.',],
+      ];
+
+      const result = reverseToSud(pattern);
+
+      expect(result).to.deep.equal([
+        [undefined,undefined,undefined,],
+        [undefined,'O','O',],
+        [undefined,'#','O',],
+        ['O',undefined,'#',],
+        ['O','O',undefined,],
+      ])
+    });
+
+    it('should reverse to north', () => {
+      const pattern = [
+        ['.','.','.',],
+        ['.','O','#',],
+        ['O','#','.',],
+        ['O','.','O',],
+        ['.','O','O',],
+      ];
+
+      const result = reverseToNorth(pattern);
+
+      expect(result).to.deep.equal([
+        ['O','O',undefined,],
+        ['O',undefined,'#',],
+        [undefined,'#','O',],
+        [undefined,'O','O',],
+        [undefined,undefined,undefined,],
+      ])
+    });
+  });
+  describe('#Cycle', () => {
+    it('should return one cycle', () => {
+      const input = `O....#....
+O.OO#....#
+.....##...
+OO.#O....O
+.O.....O#.
+O.#..O.#.#
+..O..#O..O
+.......O..
+#....###..
+#OO..#....`.trim().split('\n')
+        .map(l=> l.split(''))
+      const expectedResult = `.....#....
+....#...O#
+...OO##...
+.OO#......
+.....OOO#.
+.O#...O#.#
+....O#....
+......OOOO
+#...O###..
+#..OO#....`.trim().split('\n')
+        .map(l=> l.split('').map(l=> {
+          if(l==='.') return undefined
+          return l
+        }));
+
+      const result = cycle(input)
+
+      expect(result).to.deep.equal(expectedResult)
+    });
+
+    it('should return three cycle', () => {
+      const input = `O....#....
+O.OO#....#
+.....##...
+OO.#O....O
+.O.....O#.
+O.#..O.#.#
+..O..#O..O
+.......O..
+#....###..
+#OO..#....`.trim().split('\n')
+        .map(l=> l.split(''))
+      const expectedResult = `.....#....
+....#...O#
+.....##...
+..O#......
+.....OOO#.
+.O#...O#.#
+....O#...O
+.......OOO
+#...O###.O
+#.OOO#...O`.trim().split('\n')
+        .map(l=> l.split('').map(l=> {
+          if(l==='.') return undefined
+          return l
+        }));
+
+      const result = cycleMaker(input, 3)
+
+      expect(result).to.deep.equal(expectedResult)
+    });
+
+    it('should find load after `1000000000` cycle', () => {
+      const input = `O....#....
+O.OO#....#
+.....##...
+OO.#O....O
+.O.....O#.
+O.#..O.#.#
+..O..#O..O
+.......O..
+#....###..
+#OO..#....`.trim().split('\n')
+        .map(l=> l.split(''))
+
+      const result = findCycle(input)
+
+      expect(result).toBe(64)
+    });
+  })
+})
