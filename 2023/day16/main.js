@@ -4,13 +4,36 @@ const _ = require("lodash");
 const memory = [];
 const memoryMove = []
 let fData;
+let max = 0;
 
 fs.readFile('./input', 'utf8',(err, data) => {
   fData = data.toString().trim().split('\n')
     .map(d=> d.split(''));
-  move('+j', {pi: 0, pj:0})
-  console.log(memory.length)
+  column()
+  line()
+  console.log(max)
 });
+
+function column() {
+  for (let i = 0; i <fData.length; i++) {
+    findLongPath('+j', {pi:i, pj:0})
+    findLongPath('-j', {pi:i, pj:fData[0].length-1})
+  }
+}
+
+function line() {
+  for (let i = 0; i <fData[0].length; i++) {
+    findLongPath('+i', {pi:0, pj:i})
+    findLongPath('-i', {pi:fData.length, pj:i})
+  }
+}
+
+function findLongPath(direction, {pi, pj}) {
+  memory.length = 0;
+  memoryMove.length = 0;
+  move(direction, {pi, pj})
+  if(memory.length> max) max = memory.length
+}
 
 function move(direction, {pi, pj}) {
   if(pi < 0 || pi > fData.length - 1 || pj < 0 || pj > fData[0].length - 1) {
